@@ -3,45 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TXO 選擇權籌碼監控儀表板</title>
-    <style>
-        :root { --bg: #1a1a1a; --card: #2a2a2a; --text: #e0e0e0; --accent: #00ff88; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .dashboard { width: 100%; max-width: 900px; background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #444; }
-        .header { background: #333; padding: 20px; border-bottom: 2px solid var(--accent); display: flex; justify-content: space-between; align-items: center; }
-        h1 { margin: 0; font-size: 1.5rem; color: var(--accent); }
-        .status-tag { background: rgba(0,255,136,0.1); color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; border: 1px solid var(--accent); }
-        .content { padding: 20px; text-align: center; }
-        .main-img { width: 100%; border-radius: 8px; border: 1px solid #555; margin-bottom: 20px; background: #000; }
-        .footer { padding: 15px; font-size: 0.85rem; color: #888; background: #252525; border-top: 1px solid #444; }
-        .btn { display: inline-block; padding: 8px 16px; background: var(--accent); color: #000; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px; transition: 0.3s; }
-        .btn:hover { opacity: 0.8; transform: translateY(-2px); }
-    </style>
+    <title>TXO 選擇權籌碼監控終端</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
     <div class="dashboard">
         <div class="header">
-            <h1>📊 TXO 盤後分析動態看板</h1>
-            <div class="status-tag">Live 更新中</div>
+            <div class="title-group">
+                <h1>TXO 籌碼分析終端</h1>
+            </div>
+            <div class="status-tag">
+                <span class="dot"></span> 系統同步中 (Live)
+            </div>
         </div>
+        
         <div class="content">
-            <img id="mainChart" src="latest.png" alt="載入中..." class="main-img">
-            <div id="dataInfo">正在讀取最新籌碼數據...</div>
-            <a href="https://github.com/zzac9ej/OI-Images" class="btn">查看圖庫源碼</a>
+            <div class="image-container main-view">
+                <div class="view-label">當前顯示：<span id="currentDate">Latest</span></div>
+                <img id="mainChart" src="latest.png" alt="數據載入中..." class="main-img">
+            </div>
+            
+            <div class="data-panel">
+                <div class="data-card">
+                    <div class="data-label">市場情緒 (P/C Ratio)</div>
+                    <div class="data-value" id="pcVal">自動判讀中</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-label">最後更新時間</div>
+                    <div class="data-value" id="time">---</div>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <h2 style="color: var(--accent); font-size: 1.2rem; margin: 20px 0 10px 0; text-align: left; width: 100%;">歷史紀錄回顧</h2>
+                <div class="history-grid" id="historyGrid">
+                    <div class="history-item" onclick="changeView('latest.png', 'Latest', this)">
+                        <img src="latest.png">
+                        <span>最新看板</span>
+                    </div>
+                </div>
+            </div>
         </div>
+
         <div class="footer">
-            網頁自動同步時間：<span id="time">---</span><br>
-            提示：本看板每日 15:30 自動更新，數據來源自台灣期交所。
+            <div>本看板每日 15:30 自動更新，數據僅供參考。</div>
+            <a href="https://github.com/zzac9ej/OI-Images" class="btn">開發者 GitHub</a>
         </div>
     </div>
-
-    <script>
-        // 更新時間顯示
-        document.getElementById('time').innerText = new Date().toLocaleString();
-        
-        // 解決瀏覽器快取問題：強制重新整理圖片
-        const img = document.getElementById('mainChart');
-        img.src = 'latest.png?t=' + new Date().getTime();
-    </script>
 </body>
 </html>
