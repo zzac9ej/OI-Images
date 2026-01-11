@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TXO 盤後監控面板</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f4f4f9; padding: 20px; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; max-width: 800px; margin: auto; }
+        img { max-width: 100%; border-radius: 8px; margin-top: 15px; }
+        .info { font-size: 1.2em; color: #333; margin: 10px 0; }
+        .timestamp { font-size: 0.8em; color: #888; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>📊 TXO 選擇權未平倉分析</h1>
+        <div class="info">最後更新網址：<code>latest.png</code></div>
+        <img src="latest.png" alt="最新分析圖">
+        <p class="timestamp">更新時間：<span id="update-time">讀取中...</span></p>
+    </div>
+
+    <script>
+        document.getElementById('update-time').innerText = new Date().toLocaleString();
+    </script>
+</body>
+</html>
