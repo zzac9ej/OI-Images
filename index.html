@@ -3,25 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TXO 盤後監控面板</title>
+    <title>TXO 選擇權籌碼監控儀表板</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #f4f4f9; padding: 20px; }
-        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; max-width: 800px; margin: auto; }
-        img { max-width: 100%; border-radius: 8px; margin-top: 15px; }
-        .info { font-size: 1.2em; color: #333; margin: 10px 0; }
-        .timestamp { font-size: 0.8em; color: #888; }
+        :root { --bg: #1a1a1a; --card: #2a2a2a; --text: #e0e0e0; --accent: #00ff88; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .dashboard { width: 100%; max-width: 900px; background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #444; }
+        .header { background: #333; padding: 20px; border-bottom: 2px solid var(--accent); display: flex; justify-content: space-between; align-items: center; }
+        h1 { margin: 0; font-size: 1.5rem; color: var(--accent); }
+        .status-tag { background: rgba(0,255,136,0.1); color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; border: 1px solid var(--accent); }
+        .content { padding: 20px; text-align: center; }
+        .main-img { width: 100%; border-radius: 8px; border: 1px solid #555; margin-bottom: 20px; background: #000; }
+        .footer { padding: 15px; font-size: 0.85rem; color: #888; background: #252525; border-top: 1px solid #444; }
+        .btn { display: inline-block; padding: 8px 16px; background: var(--accent); color: #000; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px; transition: 0.3s; }
+        .btn:hover { opacity: 0.8; transform: translateY(-2px); }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>📊 TXO 選擇權未平倉分析</h1>
-        <div class="info">最後更新網址：<code>latest.png</code></div>
-        <img src="latest.png" alt="最新分析圖">
-        <p class="timestamp">更新時間：<span id="update-time">讀取中...</span></p>
+    <div class="dashboard">
+        <div class="header">
+            <h1>📊 TXO 盤後分析動態看板</h1>
+            <div class="status-tag">Live 更新中</div>
+        </div>
+        <div class="content">
+            <img id="mainChart" src="latest.png" alt="載入中..." class="main-img">
+            <div id="dataInfo">正在讀取最新籌碼數據...</div>
+            <a href="https://github.com/zzac9ej/OI-Images" class="btn">查看圖庫源碼</a>
+        </div>
+        <div class="footer">
+            網頁自動同步時間：<span id="time">---</span><br>
+            提示：本看板每日 15:30 自動更新，數據來源自台灣期交所。
+        </div>
     </div>
 
     <script>
-        document.getElementById('update-time').innerText = new Date().toLocaleString();
+        // 更新時間顯示
+        document.getElementById('time').innerText = new Date().toLocaleString();
+        
+        // 解決瀏覽器快取問題：強制重新整理圖片
+        const img = document.getElementById('mainChart');
+        img.src = 'latest.png?t=' + new Date().getTime();
     </script>
 </body>
 </html>
