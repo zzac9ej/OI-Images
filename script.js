@@ -42,16 +42,23 @@ async function loadHistoryFromGit() {
     }
 }
 
-function createFolderUI(name, files) {
+function createFolderUI(name, folderData) {
     const grid = document.getElementById('historyGrid');
     const folderWrap = document.createElement('div');
     folderWrap.style.width = "100%";
+    
+    // 從 folderData 提取檔案清單和更新時間
+    const files = folderData.files;
+    const updateTime = folderData.last_update;
     
     folderWrap.innerHTML = `
         <div class="folder-item" onclick="toggleFolder(this)">
             <div class="folder-header">
                 <span class="folder-name">📂 ${name}</span>
                 <span style="font-size:0.8rem;">${files.length} 張圖表</span>
+            </div>
+            <div class="update-time" style="font-size:0.75rem; color:#8b949e; margin-top:5px; border-top:1px solid #30363d; padding-top:5px;">
+                🕒 最後同步：${updateTime}
             </div>
         </div>
         <div class="images-subgrid"></div>
