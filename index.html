@@ -19,33 +19,24 @@
         </div>
         
         <div class="content">
-            <div class="image-container main-view">
-                <div class="view-label">當前顯示：<span id="currentDate">Latest</span></div>
-                <img id="mainChart" src="latest.png" alt="數據載入中..." class="main-img">
-            </div>
-            
-            <div class="data-panel">
-                <div class="data-card">
-                    <div class="data-label">市場情緒 (P/C Ratio)</div>
-                    <div class="data-value" id="pcVal">128.66%</div>
+            <div class="main-view-wrapper">
+                <div class="image-container main-view">
+                    <div class="view-label">當前：<span id="currentDate">Latest</span></div>
+                    <img id="mainChart" src="latest.png" class="main-img">
                 </div>
-                <div class="data-card">
-                    <div class="data-label">最後更新時間</div>
-                    <div class="data-value" id="time">---</div>
+                
+                <div class="data-panel">
+                    <div class="data-card">
+                        <div class="data-label">市場情緒 (P/C Ratio)</div>
+                        <div class="data-value" id="pcVal">128.66%</div>
+                    </div>
                 </div>
             </div>
 
             <div class="history-section">
-                <h2 style="color: var(--accent); font-size: 1.2rem; margin: 20px 0 10px 0; text-align: left; width: 100%;">歷史紀錄回顧</h2>
+                <h2 style="color: var(--accent); font-size: 1rem; margin-bottom: 15px;">📁 合約歷史庫</h2>
                 <div class="history-grid" id="historyGrid">
-                <history-start></history-start>
-
-                <history-end></history-end>
-                    <div class="history-item" onclick="changeView('latest.png', 'Latest', this)">
-                        <img src="latest.png">
-                        <span>最新看板</span>
                     </div>
-                </div>
             </div>
         </div>
 

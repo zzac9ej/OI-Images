@@ -1,3 +1,9 @@
+html, body {
+    height: 100vh;
+    overflow: hidden; 
+    margin: 0;
+    padding: 0;
+}
 :root { 
     --bg: #0d1117; 
     --card: rgba(22, 27, 34, 0.8); 
@@ -21,15 +27,13 @@ body {
 
 /* 儀表板主體 */
 .dashboard { 
-    width: 95%; 
-    max-width: 1200px; 
-    background: var(--card); 
-    border-radius: 20px; 
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--border);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    overflow: hidden;
-    margin: 20px;
+    width: 100vw; 
+    height: 100vh;
+    max-width: none; 
+    margin: 0;
+    border-radius: 0; /* 滿版不留圓角 */
+    display: flex;
+    flex-direction: column;
 }
 
 .header { 
@@ -85,10 +89,14 @@ body {
 }
 
 .content { 
-    padding: 30px; 
+    flex: 1;
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row; 
+    overflow: hidden; 
+    padding: 15px;      /* 縮小間距 */
+    gap: 15px;
+    box-sizing: border-box; /* 確保 padding 不會撐大寬度 */
+    width: 100%;        /* 強制寬度 100% */
 }
 
 /* 主要圖片展示區 */
@@ -102,10 +110,28 @@ body {
     transition: all 0.3s ease;
 }
 
-.main-img { 
-    width: 100%; 
-    display: block;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+/* 左側：大圖區 (佔據大部分空間) */
+.main-view-wrapper {
+    flex: 1;           /* 改為彈性擴展 */
+    min-width: 0;      /* 核心：防止子元素撐開容器 */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.image-container.main-view {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+}
+
+.main-img {
+    max-height: 85vh; /* 限制高度，確保不撐開頁面 */
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
 }
 
 .view-label {
@@ -141,13 +167,47 @@ body {
 .data-label { font-size: 0.8rem; color: #8b949e; margin-bottom: 5px; }
 .data-value { font-size: 1.25rem; font-weight: bold; color: var(--accent); }
 
-/* 歷史紀錄區塊 */
-.history-section {
-    width: 100%;
-    margin-top: 40px;
-    padding-top: 25px;
-    border-top: 1px dashed var(--border);
+/* 早上：夜盤/當沖類型 (黃色) */
+.type-night {
+    border-left: 5px solid #ffcc00 !important;
 }
+.type-night span::before {
+    content: "☀️ ";
+}
+
+/* 下午：盤後 OI 類型 (紅色) */
+.type-oi {
+    border-left: 5px solid #ff4d4d !important;
+}
+.type-oi span::before {
+    content: "📊 ";
+}
+
+/* 選中狀態的發光效果 */
+.history-item.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 15px var(--glow);
+    transform: scale(1.02);
+}
+
+
+/* 歷史紀錄區塊 */
+/* 右側：資料夾與歷史紀錄 (獨立滾動但隱藏滾動條) */
+.history-section {
+    width: 320px;      /* 固定寬度，適合顯示兩排小圖 */
+    flex-shrink: 0;    /* 防止被壓縮 */
+    height: 100%;
+    overflow-y: auto;  /* 必要時顯示滾動，但我們會隱藏它 */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    background: rgba(33, 38, 45, 0.2); /* 稍微深色區分 */
+    padding: 10px;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+    .history-section::-webkit-scrollbar {
+        display: none;
+    }
 
 .history-grid {
     display: grid;
@@ -175,7 +235,7 @@ body {
 
 .history-item img {
     width: 100%;
-    height: 110px;
+    height: 80px;
     object-fit: cover;
     filter: grayscale(30%);
     transition: 0.3s;
@@ -185,10 +245,58 @@ body {
     filter: grayscale(0%);
 }
 
+/* 資料夾外觀 */
+.folder-item {
+    background: linear-gradient(145deg, #1c2128, #161b22);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+    
+}
+
+.folder-item:hover {
+    border-color: #58a6ff;
+    transform: translateY(-3px);
+    background: #1c2128;
+}
+
+.folder-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.folder-icon { font-size: 1.5rem; }
+.folder-name { font-weight: bold; color: #58a6ff; }
+
+.update-time {
+    font-size: 0.75rem;
+    color: #8b949e;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+}
+
+/* 圖片網格 (隱藏/顯示切換) */
+.images-subgrid {
+    display: none;
+    grid-template-columns: 1fr 1fr; /* 側邊欄維持兩排 */
+    gap: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+
+
 .history-item span {
     display: block;
-    padding: 10px;
-    font-size: 0.85rem;
+    padding: 5px;
+    font-size: 0.7rem;
     font-weight: 600;
     text-align: center;
     background: rgba(33, 38, 45, 0.8);
