@@ -122,18 +122,21 @@ body {
 .image-container.main-view {
     flex: 1;
     display: flex;
+    flex-direction: column; /* ✨ 改為垂直排列，方便下方留白 */
     align-items: center;
     justify-content: center;
     background: #000;
-    padding-bottom: 30px; /* ✨ 新增：為 X 軸標籤預留 30px 空間 */
-    box-sizing: border-box; /* 確保 padding 不會撐破容器 */
+    padding: 20px;         /* ✨ 全方位留白 */
+    box-sizing: border-box;
 }
 
 .main-img {
-    max-height: 85vh; /* 限制高度，確保不撐開頁面 */
+    max-height: 75vh; /* ✨ 從 85 降到 75，給底部留出更多呼吸空間 */
     width: auto;
-    max-width: 100%;
+    max-width: 95%;   /* ✨ 寬度也稍微收縮，避免 X 軸兩端太擠 */
     object-fit: contain;
+    margin-bottom: 20px; /* ✨ 強制與下方元素保持距離 */
+    transition: opacity 0.3s ease;
 }
 
 .view-label {
@@ -151,11 +154,11 @@ body {
 
 /* 數據卡片 */
 .data-panel {
-    margin-top: 25px;
+    margin-top: 15px;      /* ✨ 縮小間距，避免把上方圖片往外推 */
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
 }
 
 .data-card {
@@ -196,7 +199,7 @@ body {
 /* 歷史紀錄區塊 */
 /* 右側：資料夾與歷史紀錄 (獨立滾動但隱藏滾動條) */
 .history-section {
-    width: 320px;      /* 固定寬度，適合顯示兩排小圖 */
+    width: 300px;      /* 固定寬度，適合顯示兩排小圖 */
     flex-shrink: 0;    /* 防止被壓縮 */
     height: 100%;
     overflow-y: auto;  /* 必要時顯示滾動，但我們會隱藏它 */
