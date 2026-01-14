@@ -133,10 +133,12 @@ function changeView(src, date, element) {
     };
 }
 
+document.addEventListener('DOMContentLoaded', loadHistoryFromGit);
 // 初始化燈箱功能
 let currentScale = 1;
 let isDragging = false;
-let startX, startY, scrollLeft, scrollTop;
+let startX = 0, startY = 0;
+let translateX = 0, translateY = 0;
 
 // 綁定主圖點擊
 document.getElementById('mainChart').onclick = function() {
@@ -148,8 +150,18 @@ function openModal(src) {
     const modalImg = document.getElementById('modalImg');
     modal.style.display = "flex";
     modalImg.src = src;
+    
+    // 重置狀態
     currentScale = 1;
-    modalImg.style.transform = `scale(${currentScale}) translate(0px, 0px)`;
+    translateX = 0;
+    translateY = 0;
+    updateTransform();
+}
+
+function updateTransform() {
+    const modalImg = document.getElementById('modalImg');
+    // 🚀 關鍵：必須同時包含 translate 和 scale，順序不能錯
+    modalImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
 }
 
 function closeModal() {
@@ -159,21 +171,47 @@ function closeModal() {
 // 滾動縮放邏輯
 document.getElementById('imageModal').onwheel = function(e) {
     e.preventDefault();
-    const modalImg = document.getElementById('modalImg');
-    const zoomSpeed = 0.15;
+    const zoomSpeed = 0.2;
+    const oldScale = currentScale;
     
     if (e.deltaY < 0) {
-        currentScale = Math.min(currentScale + zoomSpeed, 5); // 最大放大 5 倍
+        currentScale = Math.min(currentScale + zoomSpeed, 5);
     } else {
-        currentScale = Math.max(currentScale - zoomSpeed, 1); // 最小 1 倍
+        currentScale = Math.max(currentScale - zoomSpeed, 1);
+        if (currentScale === 1) { translateX = 0; translateY = 0; } // 縮回原樣時重置位置
     }
-    modalImg.style.transform = `scale(${currentScale})`;
+    updateTransform();
+};
+const modalImg = document.getElementById('modalImg');
+
+modalImg.onmousedown = function(e) {
+    if (currentScale <= 1) return; // 沒放大就不給拖
+    isDragging = true;
+    modalImg.style.cursor = "grabbing";
+    modalImg.style.transition = "none"; // 拖動時關閉動畫，避免延遲感
+    
+    // 紀錄點擊時的初始位置
+    startX = e.clientX - translateX;
+    startY = e.clientY - translateY;
 };
 
+// 監聽全域滑鼠移動，避免滑鼠移出圖片後失效
+window.onmousemove = function(e) {
+    if (!isDragging) return;
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    updateTransform();
+};
+
+window.onmouseup = function() {
+    isDragging = false;
+    if (modalImg) {
+        modalImg.style.cursor = "grab";
+        modalImg.style.transition = "transform 0.1s ease-out";
+    }
+};
 // 簡單的點擊 ESC 關閉功能
 document.addEventListener('keydown', (e) => {
     if (e.key === "Escape") closeModal();
 });
 
-
-document.addEventListener('DOMContentLoaded', loadHistoryFromGit);
