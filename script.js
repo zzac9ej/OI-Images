@@ -1,6 +1,3 @@
-/**
- * TXO 儀表板核心邏輯 - 混合模式 (JSON + 資料夾分類)
- */
 const GITHUB_REPO = "zzac9ej/OI-Images"; 
 
 async function loadHistoryFromGit() {
@@ -9,7 +6,6 @@ async function loadHistoryFromGit() {
     grid.innerHTML = "<p>正在載入籌碼資料庫...</p>";
 
     try {
-        // 1. 讀取由 YAML 生成的靜態 list.json
         const response = await fetch('list.json?t=' + new Date().getTime());
         const data = await response.json(); 
 
@@ -17,18 +13,15 @@ async function loadHistoryFromGit() {
         const threshold = new Date();
         threshold.setDate(threshold.getDate() - 15);
 
-        // 2. 遍歷合約資料夾
-        for (const [folderName, files] of Object.entries(data)) {
-            // 過濾過舊合約 (15天)
+        for (const [folderName, folderData] of Object.entries(data)) {
             const folderYear = parseInt(folderName.substring(0, 4));
             const folderMonth = parseInt(folderName.substring(4, 6)) - 1;
             const folderDate = new Date(folderYear, folderMonth + 1, 0);
             if (folderDate < threshold) continue;
 
-            createFolderUI(folderName, files);
+            createFolderUI(folderName, folderData);
         }
         
-        // 3. 自動點開第一個資料夾並顯示最新圖
         setTimeout(() => {
             const firstFolder = document.querySelector('.folder-item');
             if (firstFolder) {
@@ -38,7 +31,7 @@ async function loadHistoryFromGit() {
         }, 300);
 
     } catch (e) {
-        grid.innerHTML = "<p>暫時無法獲取數據，請檢查 list.json 是否存在。</p>";
+        grid.innerHTML = "<p>暫時無法獲獲數據。</p>";
     }
 }
 
@@ -47,7 +40,6 @@ function createFolderUI(name, folderData) {
     const folderWrap = document.createElement('div');
     folderWrap.style.width = "100%";
     
-    // 從 folderData 提取檔案清單和更新時間
     const files = folderData.files;
     const updateTime = folderData.last_update;
     
@@ -65,13 +57,11 @@ function createFolderUI(name, folderData) {
     `;
 
     const subGrid = folderWrap.querySelector('.images-subgrid');
-    
     files.forEach(fileName => {
         const isNight = fileName.includes('Night_Volume');
         const dateMatch = fileName.match(/\d{8}/);
         const dateStr = dateMatch ? dateMatch[0] : "";
         const formattedDate = `${dateStr.substring(4,6)}/${dateStr.substring(6,8)}`;
-        
         const imgPath = `contracts/${name}/${fileName}`;
 
         const imgBtn = document.createElement('div');
@@ -79,25 +69,18 @@ function createFolderUI(name, folderData) {
         imgBtn.onclick = (e) => {
             e.stopPropagation();
             changeView(imgPath, formattedDate, imgBtn);
-            updateInfoPanel(isNight); // 更新面板文字
+            updateInfoPanel(isNight);
         };
-        imgBtn.innerHTML = `
-            <img src="${imgPath}" loading="lazy">
-            <span>${formattedDate} ${isNight ? '☀️當沖' : '📊盤後'}</span>
-        `;
+        imgBtn.innerHTML = `<img src="${imgPath}" loading="lazy"><span>${formattedDate} ${isNight ? '☀️當沖' : '📊盤後'}</span>`;
         subGrid.appendChild(imgBtn);
     });
-
     grid.appendChild(folderWrap);
 }
 
-// 展開/收合控制
 function toggleFolder(element) {
     const subGrid = element.nextElementSibling;
     const isOpen = subGrid.style.display === 'grid';
-    // 關閉其他所有展開的資料夾
     document.querySelectorAll('.images-subgrid').forEach(el => el.style.display = 'none');
-    // 切換目前的
     subGrid.style.display = isOpen ? 'none' : 'grid';
 }
 
@@ -119,7 +102,6 @@ function changeView(src, date, element) {
 
     mainImg.style.opacity = '0.3';
     const cacheBuster = src + '?t=' + new Date().getTime();
-
     const tempImg = new Image();
     tempImg.src = cacheBuster; 
     tempImg.onload = function() {
@@ -127,35 +109,20 @@ function changeView(src, date, element) {
         displayDate.innerText = date;
         mainImg.style.opacity = '1';
     };
-    tempImg.onerror = () => {
-        mainImg.alt = "⚠️ 圖片尚未同步...";
-        mainImg.style.opacity = '1';
-    };
 }
 
-document.addEventListener('DOMContentLoaded', loadHistoryFromGit);
-// 初始化燈箱功能
 // --- 燈箱核心變數 ---
 let currentScale = 1;
 let isDragging = false;
 let startX = 0, startY = 0;
 let translateX = 0, translateY = 0;
 
-// 1. 綁定主圖點擊打開燈箱
-document.getElementById('mainChart').onclick = function() {
-    openModal(this.src);
-};
-
 function openModal(src) {
     const modal = document.getElementById('imageModal');
     const modalImg = document.getElementById('modalImg');
     modal.style.display = "flex";
     modalImg.src = src;
-    
-    // 重置所有狀態
-    currentScale = 1;
-    translateX = 0;
-    translateY = 0;
+    currentScale = 1; translateX = 0; translateY = 0;
     updateTransform();
 }
 
@@ -164,7 +131,6 @@ function closeModal() {
     isDragging = false;
 }
 
-// 2. 統一更新位移與縮放
 function updateTransform() {
     const modalImg = document.getElementById('modalImg');
     if (modalImg) {
@@ -172,7 +138,11 @@ function updateTransform() {
     }
 }
 
-// 3. 滾動縮放邏輯
+document.addEventListener('DOMContentLoaded', () => {
+    loadHistoryFromGit();
+    document.getElementById('mainChart').onclick = function() { openModal(this.src); };
+});
+
 document.getElementById('imageModal').onwheel = function(e) {
     e.preventDefault();
     const zoomSpeed = 0.25;
@@ -180,21 +150,16 @@ document.getElementById('imageModal').onwheel = function(e) {
         currentScale = Math.min(currentScale + zoomSpeed, 5);
     } else {
         currentScale = Math.max(currentScale - zoomSpeed, 1);
-        if (currentScale === 1) { translateX = 0; translateY = 0; } // 縮回原樣時歸位
+        if (currentScale === 1) { translateX = 0; translateY = 0; }
     }
     updateTransform();
 };
 
-// 4. 🚀 核心拖拽邏輯 (移除重複定義，合併為監聽器模式)
 document.addEventListener('mousedown', function(e) {
     if (e.target.id === 'modalImg' && currentScale > 1) {
-        e.preventDefault(); // 阻斷瀏覽器內建圖片拖動
+        e.preventDefault();
         isDragging = true;
-        const img = e.target;
-        img.style.cursor = "grabbing";
-        img.style.transition = "none"; // 拖動時關閉動畫，確保跟手
-        
-        // 紀錄起始座標（考慮到當前的位移量）
+        e.target.style.transition = "none";
         startX = e.clientX - translateX;
         startY = e.clientY - translateY;
     }
@@ -208,16 +173,9 @@ window.addEventListener('mousemove', function(e) {
 });
 
 window.addEventListener('mouseup', function() {
-    if (!isDragging) return;
     isDragging = false;
     const modalImg = document.getElementById('modalImg');
-    if (modalImg) {
-        modalImg.style.cursor = "grab";
-        modalImg.style.transition = "transform 0.1s ease-out";
-    }
+    if (modalImg) modalImg.style.transition = "transform 0.1s ease-out";
 });
 
-// 5. ESC 關閉功能
-document.addEventListener('keydown', (e) => {
-    if (e.key === "Escape") closeModal();
-});
+document.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
