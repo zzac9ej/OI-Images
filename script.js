@@ -1,142 +1,97 @@
 /**
- * TXO 儀表板核心邏輯 - GitHub API 全自動掃描版
+ * TXO 儀表板核心邏輯 - 混合模式 (JSON + 資料夾分類)
  */
 const GITHUB_REPO = "zzac9ej/OI-Images"; 
 
 async function loadHistoryFromGit() {
     const grid = document.getElementById('historyGrid');
     if (!grid) return;
-    grid.innerHTML = "<p>正在整理近期合約...</p>";
+    grid.innerHTML = "<p>正在載入籌碼資料庫...</p>";
 
     try {
-        const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/contracts`);
-        const folders = await response.json();
+        // 1. 讀取由 YAML 生成的靜態 list.json
+        const response = await fetch('list.json?t=' + new Date().getTime());
+        const data = await response.json(); 
 
         grid.innerHTML = ""; 
+        const threshold = new Date();
+        threshold.setDate(threshold.getDate() - 15);
 
-        // 取得「15 天前」的時間點
-        const fifteenDaysAgo = new Date();
-        fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+        // 2. 遍歷合約資料夾
+        for (const [folderName, files] of Object.entries(data)) {
+            // 過濾過舊合約 (15天)
+            const folderYear = parseInt(folderName.substring(0, 4));
+            const folderMonth = parseInt(folderName.substring(4, 6)) - 1;
+            const folderDate = new Date(folderYear, folderMonth + 1, 0);
+            if (folderDate < threshold) continue;
 
-        for (const folder of folders) {
-            if (folder.type === 'dir') {
-                /** * 效能優化：過濾邏輯 
-                 * 假設資料夾名為 202601 或 202601W2
-                 * 我們提取前 6 位數 YYYYMM
-                 */
-                const folderDateStr = folder.name.substring(0, 6);
-                const folderYear = parseInt(folderDateStr.substring(0, 4));
-                const folderMonth = parseInt(folderDateStr.substring(4, 6)) - 1; // JS 月份從 0 開始
-                
-                // 建立一個該月份最後一天的代表日期（粗略判斷）
-                const folderDate = new Date(folderYear, folderMonth + 1, 0);
-
-                // 如果該合約月份已經結束超過 15 天，就不再深入 call API 抓取裡面的圖片
-                if (folderDate < fifteenDaysAgo) {
-                    console.log(`跳過過期合約: ${folder.name}`);
-                    continue; 
-                }
-
-                // --- 以下是原本抓取圖片的邏輯 ---
-                const imgRes = await fetch(folder.url);
-                const files = await imgRes.json();
-                
-                const commitRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/commits?path=contracts/${folder.name}&per_page=1`);
-                const commitData = await commitRes.json();
-                const lastUpdate = commitData.length > 0 ? new Date(commitData[0].commit.committer.date).toLocaleString('zh-TW') : "---";
-
-                createFolderUI(folder.name, files, lastUpdate);
-            }
+            createFolderUI(folderName, files);
         }
         
+        // 3. 自動點開第一個資料夾並顯示最新圖
         setTimeout(() => {
             const firstFolder = document.querySelector('.folder-item');
-            if (firstFolder) firstFolder.click();
-        }, 500);
+            if (firstFolder) {
+                firstFolder.click();
+                setTimeout(() => document.querySelector('.history-item')?.click(), 100);
+            }
+        }, 300);
 
     } catch (e) {
-        console.error("載入失敗:", e);
+        grid.innerHTML = "<p>暫時無法獲取數據，請檢查 list.json 是否存在。</p>";
     }
 }
 
-function createFolderUI(name, files, updateTime) {
+function createFolderUI(name, files) {
     const grid = document.getElementById('historyGrid');
-    
-    // 資料夾外殼
     const folderWrap = document.createElement('div');
     folderWrap.style.width = "100%";
     
-    const folderItem = document.createElement('div');
-    folderItem.className = 'folder-item';
-    folderItem.innerHTML = `
-        <div class="folder-header">
-            <span class="folder-name"><span class="folder-icon">📂</span> ${name}</span>
-            <span style="color:var(--text); font-size:0.8rem;">${files.length} 張圖表</span>
+    folderWrap.innerHTML = `
+        <div class="folder-item" onclick="toggleFolder(this)">
+            <div class="folder-header">
+                <span class="folder-name">📂 ${name}</span>
+                <span style="font-size:0.8rem;">${files.length} 張圖表</span>
+            </div>
         </div>
-        <div class="update-time">🕒 最後同步：${updateTime}</div>
+        <div class="images-subgrid"></div>
     `;
 
-    // 子網格 (存放圖片)
-    const subGrid = document.createElement('div');
-    subGrid.className = 'images-subgrid';
+    const subGrid = folderWrap.querySelector('.images-subgrid');
     
-    // 點擊資料夾展開/收合
-    folderItem.onclick = () => {
-        const isOpen = subGrid.style.display === 'grid';
-        document.querySelectorAll('.images-subgrid').forEach(el => el.style.display = 'none'); // 先關閉其他
-        subGrid.style.display = isOpen ? 'none' : 'grid';
-    };
-
-    // 填入圖片按鈕 (按日期降序)
-    files.filter(f => f.name.endsWith('.png')).reverse().forEach(file => {
-        const isNight = file.name.includes('Night_Volume');
-        const dateStr = file.name.match(/\d{8}/)?.[0] || "";
+    files.forEach(fileName => {
+        const isNight = fileName.includes('Night_Volume');
+        const dateMatch = fileName.match(/\d{8}/);
+        const dateStr = dateMatch ? dateMatch[0] : "";
         const formattedDate = `${dateStr.substring(4,6)}/${dateStr.substring(6,8)}`;
         
+        const imgPath = `contracts/${name}/${fileName}`;
+
         const imgBtn = document.createElement('div');
         imgBtn.className = `history-item ${isNight ? 'type-night' : 'type-oi'}`;
-        imgBtn.style.minWidth = "140px";
         imgBtn.onclick = (e) => {
-            e.stopPropagation(); // 防止觸發資料夾收合
-            changeView(file.download_url, formattedDate, imgBtn);
+            e.stopPropagation();
+            changeView(imgPath, formattedDate, imgBtn);
+            updateInfoPanel(isNight); // 更新面板文字
         };
         imgBtn.innerHTML = `
-            <img src="${file.download_url}" loading="lazy">
-            <span style="font-size:0.75rem;">${formattedDate} ${isNight ? '☀️當沖' : '📊盤後'}</span>
+            <img src="${imgPath}" loading="lazy">
+            <span>${formattedDate} ${isNight ? '☀️當沖' : '📊盤後'}</span>
         `;
         subGrid.appendChild(imgBtn);
     });
 
-    folderWrap.appendChild(folderItem);
-    folderWrap.appendChild(subGrid);
     grid.appendChild(folderWrap);
 }
 
-function createHistoryItem(file, contractName) {
-    const grid = document.getElementById('historyGrid');
-    const isNight = file.name.includes('Night_Volume');
-    const typeClass = isNight ? 'type-night' : 'type-oi';
-    const label = isNight ? '☀️ 當沖' : '📊 盤後';
-    
-    const dateMatch = file.name.match(/\d{8}/);
-    const dateStr = dateMatch ? dateMatch[0] : "Unknown";
-    const formattedDate = `${dateStr.substring(0,4)}/${dateStr.substring(4,6)}/${dateStr.substring(6,8)}`;
-
-    const item = document.createElement('div');
-    item.className = `history-item ${typeClass}`;
-    
-    // 點擊事件
-    item.onclick = () => {
-        changeView(file.download_url, formattedDate, item);
-        // 如果是盤後圖，可以嘗試更新 P/C Ratio 顯示（假設你未來想做的話）
-        updateInfoPanel(isNight);
-    };
-
-    item.innerHTML = `
-        <img src="${file.download_url}" loading="lazy">
-        <span>${formattedDate} ${label}<br><small>(${contractName})</small></span>
-    `;
-    grid.appendChild(item);
+// 展開/收合控制
+function toggleFolder(element) {
+    const subGrid = element.nextElementSibling;
+    const isOpen = subGrid.style.display === 'grid';
+    // 關閉其他所有展開的資料夾
+    document.querySelectorAll('.images-subgrid').forEach(el => el.style.display = 'none');
+    // 切換目前的
+    subGrid.style.display = isOpen ? 'none' : 'grid';
 }
 
 function updateInfoPanel(isNight) {
@@ -166,7 +121,7 @@ function changeView(src, date, element) {
         mainImg.style.opacity = '1';
     };
     tempImg.onerror = () => {
-        mainImg.alt = "⚠️ 圖片同步中...";
+        mainImg.alt = "⚠️ 圖片尚未同步...";
         mainImg.style.opacity = '1';
     };
 }
