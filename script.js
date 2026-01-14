@@ -135,12 +135,13 @@ function changeView(src, date, element) {
 
 document.addEventListener('DOMContentLoaded', loadHistoryFromGit);
 // 初始化燈箱功能
+// --- 燈箱核心變數 ---
 let currentScale = 1;
 let isDragging = false;
 let startX = 0, startY = 0;
 let translateX = 0, translateY = 0;
 
-// 綁定主圖點擊
+// 1. 綁定主圖點擊打開燈箱
 document.getElementById('mainChart').onclick = function() {
     openModal(this.src);
 };
@@ -151,67 +152,72 @@ function openModal(src) {
     modal.style.display = "flex";
     modalImg.src = src;
     
-    // 重置狀態
+    // 重置所有狀態
     currentScale = 1;
     translateX = 0;
     translateY = 0;
     updateTransform();
 }
 
-function updateTransform() {
-    const modalImg = document.getElementById('modalImg');
-    // 🚀 關鍵：必須同時包含 translate 和 scale，順序不能錯
-    modalImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
-}
-
 function closeModal() {
     document.getElementById('imageModal').style.display = "none";
+    isDragging = false;
 }
 
-// 滾動縮放邏輯
+// 2. 統一更新位移與縮放
+function updateTransform() {
+    const modalImg = document.getElementById('modalImg');
+    if (modalImg) {
+        modalImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+    }
+}
+
+// 3. 滾動縮放邏輯
 document.getElementById('imageModal').onwheel = function(e) {
     e.preventDefault();
-    const zoomSpeed = 0.2;
-    const oldScale = currentScale;
-    
+    const zoomSpeed = 0.25;
     if (e.deltaY < 0) {
         currentScale = Math.min(currentScale + zoomSpeed, 5);
     } else {
         currentScale = Math.max(currentScale - zoomSpeed, 1);
-        if (currentScale === 1) { translateX = 0; translateY = 0; } // 縮回原樣時重置位置
+        if (currentScale === 1) { translateX = 0; translateY = 0; } // 縮回原樣時歸位
     }
     updateTransform();
 };
-const modalImg = document.getElementById('modalImg');
 
-modalImg.onmousedown = function(e) {
-    if (currentScale <= 1) return; // 沒放大就不給拖
-    isDragging = true;
-    modalImg.style.cursor = "grabbing";
-    modalImg.style.transition = "none"; // 拖動時關閉動畫，避免延遲感
-    
-    // 紀錄點擊時的初始位置
-    startX = e.clientX - translateX;
-    startY = e.clientY - translateY;
-};
+// 4. 🚀 核心拖拽邏輯 (移除重複定義，合併為監聽器模式)
+document.addEventListener('mousedown', function(e) {
+    if (e.target.id === 'modalImg' && currentScale > 1) {
+        e.preventDefault(); // 阻斷瀏覽器內建圖片拖動
+        isDragging = true;
+        const img = e.target;
+        img.style.cursor = "grabbing";
+        img.style.transition = "none"; // 拖動時關閉動畫，確保跟手
+        
+        // 紀錄起始座標（考慮到當前的位移量）
+        startX = e.clientX - translateX;
+        startY = e.clientY - translateY;
+    }
+});
 
-// 監聽全域滑鼠移動，避免滑鼠移出圖片後失效
-window.onmousemove = function(e) {
+window.addEventListener('mousemove', function(e) {
     if (!isDragging) return;
     translateX = e.clientX - startX;
     translateY = e.clientY - startY;
     updateTransform();
-};
+});
 
-window.onmouseup = function() {
+window.addEventListener('mouseup', function() {
+    if (!isDragging) return;
     isDragging = false;
+    const modalImg = document.getElementById('modalImg');
     if (modalImg) {
         modalImg.style.cursor = "grab";
         modalImg.style.transition = "transform 0.1s ease-out";
     }
-};
-// 簡單的點擊 ESC 關閉功能
+});
+
+// 5. ESC 關閉功能
 document.addEventListener('keydown', (e) => {
     if (e.key === "Escape") closeModal();
 });
-

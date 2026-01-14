@@ -365,16 +365,15 @@ body {
 .modal-content-wrapper {
     width: 100%; height: 100%;
     display: flex; justify-content: center; align-items: center;
-    overflow: hidden; /* 隱藏溢出，改用 JS 控制位移 */
+    overflow: hidden; /* 防止放大後的內容撐開視窗 */
+    touch-action: none; /* 禁用觸控預設行為 */
 }
 
 /* 放大後的圖片 */
 #modalImg {
-    max-width: 90%; 
-    max-height: 90%;
-    transition: transform 0.1s ease-out; /* 縮放平滑動畫 */
-    cursor: grab;
-    user-select: none;
+    user-select: none;          /* 禁止選取 */
+    -webkit-user-drag: none;    /* 🚀 關鍵：絕對禁止 Webkit 原生圖片拖動行為 */
+    pointer-events: auto;       /* 確保可以接收點擊 */
 }
 
 #modalImg:active { cursor: grabbing; }
