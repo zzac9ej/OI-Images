@@ -45,5 +45,12 @@
             <a href="https://github.com/zzac9ej/OI-Images" class="btn">開發者 GitHub</a>
         </div>
     </div>
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="close-btn">&times;</span>
+            <div class="modal-content-wrapper">
+                <img id="modalImg" src="" onclick="event.stopPropagation()">
+            </div>
+        <div class="modal-hint">滾動滑鼠可縮放，按住圖片可拖動</div>
+    </div>
 </body>
 </html>

@@ -133,4 +133,47 @@ function changeView(src, date, element) {
     };
 }
 
+// 初始化燈箱功能
+let currentScale = 1;
+let isDragging = false;
+let startX, startY, scrollLeft, scrollTop;
+
+// 綁定主圖點擊
+document.getElementById('mainChart').onclick = function() {
+    openModal(this.src);
+};
+
+function openModal(src) {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImg');
+    modal.style.display = "flex";
+    modalImg.src = src;
+    currentScale = 1;
+    modalImg.style.transform = `scale(${currentScale}) translate(0px, 0px)`;
+}
+
+function closeModal() {
+    document.getElementById('imageModal').style.display = "none";
+}
+
+// 滾動縮放邏輯
+document.getElementById('imageModal').onwheel = function(e) {
+    e.preventDefault();
+    const modalImg = document.getElementById('modalImg');
+    const zoomSpeed = 0.15;
+    
+    if (e.deltaY < 0) {
+        currentScale = Math.min(currentScale + zoomSpeed, 5); // 最大放大 5 倍
+    } else {
+        currentScale = Math.max(currentScale - zoomSpeed, 1); // 最小 1 倍
+    }
+    modalImg.style.transform = `scale(${currentScale})`;
+};
+
+// 簡單的點擊 ESC 關閉功能
+document.addEventListener('keydown', (e) => {
+    if (e.key === "Escape") closeModal();
+});
+
+
 document.addEventListener('DOMContentLoaded', loadHistoryFromGit);
