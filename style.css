@@ -125,6 +125,8 @@ body {
     align-items: center;
     justify-content: center;
     background: #000;
+    padding-bottom: 30px; /* ✨ 新增：為 X 軸標籤預留 30px 空間 */
+    box-sizing: border-box; /* 確保 padding 不會撐破容器 */
 }
 
 .main-img {
