@@ -112,31 +112,36 @@ body {
 
 /* 左側：大圖區 (佔據大部分空間) */
 .main-view-wrapper {
-    flex: 1;           /* 改為彈性擴展 */
-    min-width: 0;      /* 核心：防止子元素撐開容器 */
+    flex: 1;
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0; /* 🚀 關鍵：強制容器可以縮小，不被內容撐開 */
+    overflow: hidden; 
 }
 
 .image-container.main-view {
     flex: 1;
-    display: flex;
-    flex-direction: column; /* ✨ 改為垂直排列，方便下方留白 */
-    align-items: center;
-    justify-content: center;
+    position: relative;
     background: #000;
-    padding: 20px;         /* ✨ 全方位留白 */
+    border-radius: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;    /* 垂直居中 */
+    justify-content: center; /* 水平居中 */
+    /* 🚀 這裡增加底部 padding 到 60px，強制撐開 X 軸空間 */
+    padding: 20px 20px 60px 20px !important; 
     box-sizing: border-box;
+    overflow: hidden;       /* 確保不會有東西跑出去 */
 }
 
 .main-img {
-    max-height: 75vh; /* ✨ 從 85 降到 75，給底部留出更多呼吸空間 */
-    width: auto;
-    max-width: 95%;   /* ✨ 寬度也稍微收縮，避免 X 軸兩端太擠 */
+    max-width: 100%;
+    max-height: 100%;       /* 🚀 配合容器的 padding，它會自動縮得更小 */
     object-fit: contain;
-    margin-bottom: 20px; /* ✨ 強制與下方元素保持距離 */
-    transition: opacity 0.3s ease;
+    display: block;
+    /* 🚀 確保圖片底部留白 */
+    margin-bottom: auto; 
 }
 
 .view-label {
@@ -154,19 +159,16 @@ body {
 
 /* 數據卡片 */
 .data-panel {
-    margin-top: 15px;      /* ✨ 縮小間距，避免把上方圖片往外推 */
-    width: 100%;
+    height: 90px;           /* 🚀 稍微縮減卡片高度，留更多給上面的圖 */
+    margin-top: 5px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    flex-shrink: 0;
 }
 
 .data-card {
-    background: rgba(33, 38, 45, 0.4);
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    text-align: left;
+    padding: 10px 15px; /* 縮減間距 */
 }
 
 .data-label { font-size: 0.8rem; color: #8b949e; margin-bottom: 5px; }
