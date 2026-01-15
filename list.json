@@ -1,13 +1,13 @@
 {
   "202601W2": {
-    "last_update": "2026/01/15 18:21",
+    "last_update": "2026/01/15 20:31",
     "files": [
       "Night_Volume_20260114.png",
       "Night_Volume_20260113.png"
     ]
   },
   "202601F3": {
-    "last_update": "2026/01/15 18:21",
+    "last_update": "2026/01/15 20:31",
     "files": [
       "OI_Comparison_20260113.png",
       "Full_Market_OI_20260115.png",
@@ -16,13 +16,14 @@
     ]
   },
   "202601": {
-    "last_update": "2026/01/15 18:21",
+    "last_update": "2026/01/15 20:31",
     "files": [
       "OI_Comparison_20260112.png",
       "OI_Comparison_20260109.png",
       "Night_Volume_20260115.png",
       "Night_Volume_20260113.png",
-      "Night_Volume_20260109.png"
+      "Night_Volume_20260109.png",
+      "Full_Market_OI_20260115.png"
     ]
   }
 }
